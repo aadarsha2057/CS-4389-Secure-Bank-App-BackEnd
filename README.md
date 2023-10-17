@@ -30,7 +30,7 @@ To get started with **Project Name**, follow these steps:
 
 1. Clone the repository:
    use github desktop, VScode or cmd (if cmd  ```bash)
-  [https://github.com/alan-sam/CS-4389-Secure-Bank-App.git]
+  [[https://github.com/alan-sam/CS-4389-Secure-Bank-App.git]]
    
 2. Cd to the project folder
     cd project-name
