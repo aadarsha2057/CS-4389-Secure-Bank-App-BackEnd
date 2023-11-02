@@ -1,6 +1,7 @@
 package com.utd.edu.cs4389.cometBank.controller;
 
 import com.utd.edu.cs4389.cometBank.dto.LoginDTO;
+import com.utd.edu.cs4389.cometBank.dto.SigninDTO;
 import com.utd.edu.cs4389.cometBank.service.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/bankingApp")
+@CrossOrigin(origins = "http://localhost:3000/")
 public class LoginController {
 
     @Autowired
@@ -31,9 +33,8 @@ public class LoginController {
     }
 
     // Endpoint for creating a new user
-    @PostMapping("/create/user")
-    public void createUserRequest(@RequestBody LoginDTO loginDTO) {
-        // Calls the LoginService to create a new user
-        loginService.createUser(loginDTO);
+    public void createUserRequest(@RequestBody SigninDTO SigninDTO) {
+        loginService.createUser(SigninDTO);
     }
+
 }

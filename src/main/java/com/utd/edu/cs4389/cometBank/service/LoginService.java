@@ -1,6 +1,7 @@
 package com.utd.edu.cs4389.cometBank.service;
 
 import com.utd.edu.cs4389.cometBank.dto.LoginDTO;
+import com.utd.edu.cs4389.cometBank.dto.SigninDTO;
 
 // This interface defines methods for user authentication and user creation.
 public interface LoginService {
@@ -9,5 +10,6 @@ public interface LoginService {
     boolean checkUserCredentials(LoginDTO loginDTO);
 
     // Create a new user using the provided LoginDTO.
-    void createUser(LoginDTO loginDTO);
+    void createUser(SigninDTO SigninDTO);
+
 }
