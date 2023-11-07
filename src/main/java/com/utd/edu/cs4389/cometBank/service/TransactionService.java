@@ -35,7 +35,7 @@ public class TransactionService {
                     String description = parts[0];
                     double amount = Double.parseDouble(parts[1]);
                     LocalDateTime timestamp = LocalDateTime.parse(parts[2]);
-                    transactions.add(new Transaction(description, amount, timestamp));
+                    //transactions.add(new Transaction(description, amount, timestamp));
                 }
             }
         } catch (IOException e) {

@@ -7,13 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginDTO {
-    private String fullName;
-    private String password;
     private String email;
+    private String password;
 
     // Constructor to initialize the login DTO with user information.
-    public LoginDTO(String fullName, String password, String email) {
-        this.fullName = fullName;
+    public LoginDTO(String email, String password) {
         this.password = password;
         this.email = email;
     }
