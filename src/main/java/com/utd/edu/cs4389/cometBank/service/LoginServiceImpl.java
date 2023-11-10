@@ -4,8 +4,10 @@ import com.utd.edu.cs4389.cometBank.dto.LoginDTO;
 import com.utd.edu.cs4389.cometBank.dto.SignupDTO;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -51,13 +53,10 @@ public class LoginServiceImpl implements LoginService {
             }
             // Return true if credentials are found, otherwise return false
             return found;
-
         } catch (Exception e) {
             // Log the exception
-            log.error("Error while checking user credentials.", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error checking credentials.");
         }
-        // Return false in case of exceptions
-        return false;
     }
 
     @Override
@@ -80,10 +79,10 @@ public class LoginServiceImpl implements LoginService {
             }
             br.close();
             if(found) {
-                throw new RuntimeException("Duplicate user found.");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Duplicate user found.");
             }
         } catch (Exception e) {
-            log.error("Error while checking credentials.", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error checking credentials.");
         }
 
         validateInput(signupDTO.getEmail(), signupDTO.getPassword(), signupDTO.getFullName());
@@ -96,7 +95,7 @@ public class LoginServiceImpl implements LoginService {
             Files.write(path, textToAppend.getBytes(), StandardOpenOption.APPEND);
         } catch (Exception e) {
             // Log the exception
-            log.error("Error while creating a new user.", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error saving credentials.");
         }
     }
 
@@ -105,7 +104,7 @@ public class LoginServiceImpl implements LoginService {
         if(email.contains("|") == true || password.contains("|") == true) { isValid = false; }
         if(name != null && name.contains("|") == true) { isValid = false; }
         if(isValid == false) {
-            throw new RuntimeException("Login attempt cannot contain '|'");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sign in details cannot contain '|'.");
         }
     }
 
