@@ -33,7 +33,7 @@ public class LoginController {
     }
 
     // Endpoint for creating a new user
-    @PostMapping("/create/user")
+    @PostMapping("/signup")
     public void createUserRequest(@RequestBody SignupDTO signupDTO) {
         // Calls the LoginService to create a new user
         loginService.createUser(signupDTO);
