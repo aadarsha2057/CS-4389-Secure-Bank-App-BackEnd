@@ -2,6 +2,7 @@ package com.utd.edu.cs4389.cometBank.service;
 
 import com.utd.edu.cs4389.cometBank.dto.LoginDTO;
 import com.utd.edu.cs4389.cometBank.dto.SignupDTO;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public boolean checkUserCredentials(LoginDTO loginDTO) {
+    public boolean checkUserCredentials(LoginDTO loginDTO, HttpSession session) {
         validateInput(loginDTO.getEmail(), loginDTO.getPassword(), null);
         try {
             // Open the credentials file for reading
@@ -43,6 +44,11 @@ public class LoginServiceImpl implements LoginService {
                     break;
                 }
             }
+            br.close();
+            if(found) {
+                session.setAttribute("email", loginDTO.getEmail());
+                session.setAttribute("password", loginDTO.getPassword());
+            }
             // Return true if credentials are found, otherwise return false
             return found;
 
@@ -56,6 +62,30 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void createUser(SignupDTO signupDTO) {
+        try {
+            LoginDTO loginDTO = new LoginDTO(signupDTO.getEmail(), signupDTO.getPassword());
+            BufferedReader br = new BufferedReader(new FileReader("creds.txt"));
+
+            String line;
+            boolean found = false;
+            String encryptedPw = encrypt(loginDTO.getPassword());
+
+            // Read the file line by line and check for matching credentials
+            while ((line = br.readLine()) != null) {
+                String[] splitStr = line.split("\\|");
+                if (splitStr[1].equals(encryptedPw) && splitStr[2].equals(loginDTO.getEmail())) {
+                    found = true;
+                    break;
+                }
+            }
+            br.close();
+            if(found) {
+                throw new RuntimeException("Duplicate user found.");
+            }
+        } catch (Exception e) {
+            log.error("Error while checking credentials.", e);
+        }
+
         validateInput(signupDTO.getEmail(), signupDTO.getPassword(), signupDTO.getFullName());
         // Create a string to append to the credentials file
         String encryptedPw = encrypt(signupDTO.getPassword());
@@ -75,7 +105,7 @@ public class LoginServiceImpl implements LoginService {
         if(email.contains("|") == true || password.contains("|") == true) { isValid = false; }
         if(name != null && name.contains("|") == true) { isValid = false; }
         if(isValid == false) {
-            throw new RuntimeException("login attempt cannot contain '|'");
+            throw new RuntimeException("Login attempt cannot contain '|'");
         }
     }
 
