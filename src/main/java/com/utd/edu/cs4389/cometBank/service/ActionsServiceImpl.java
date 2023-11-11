@@ -2,8 +2,10 @@ package com.utd.edu.cs4389.cometBank.service;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,7 +27,7 @@ public class ActionsServiceImpl implements ActionsService{
         String oldLine = parts.toString();
 
         if(amt > Double.parseDouble(parts[3]) || amt <= 0) {
-            throw new RuntimeException("Invalid amount");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid amount.");
         }
         parts[3] = "" + (Double.parseDouble(parts[3]) - amt);
         updateDocument(oldLine, (parts[0] + "|" + parts[1] + "|" + parts[2] + "|" + parts[3] + "|" + parts[4]));
@@ -50,7 +52,7 @@ public class ActionsServiceImpl implements ActionsService{
         String oldLine = parts.toString();
 
         if(amt > Double.parseDouble(parts[4]) || amt <= 0) {
-            throw new RuntimeException("Invalid amount");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid amount.");
         }
         parts[4] = "" + (Double.parseDouble(parts[4]) - amt);
         updateDocument(oldLine, (parts[0] + "|" + parts[1] + "|" + parts[2] + "|" + parts[3] + "|" + parts[4]));
@@ -75,7 +77,7 @@ public class ActionsServiceImpl implements ActionsService{
         String oldLine = parts.toString();
 
         if(amt > Double.parseDouble(parts[3]) || amt <= 0) {
-            throw new RuntimeException("Invalid amount");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid amount.");
         }
         parts[3] = "" + (Double.parseDouble(parts[3]) - amt);
         parts[4] = "" + (Double.parseDouble(parts[4]) + amt);
@@ -90,7 +92,7 @@ public class ActionsServiceImpl implements ActionsService{
         String oldLine = parts.toString();
 
         if(amt > Double.parseDouble(parts[4]) || amt <= 0) {
-            throw new RuntimeException("Invalid amount");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid amount.");
         }
         parts[3] = "" + (Double.parseDouble(parts[3]) + amt);
         parts[4] = "" + (Double.parseDouble(parts[4]) - amt);
@@ -118,7 +120,7 @@ public class ActionsServiceImpl implements ActionsService{
             br.close();
             return splitStr;
         } catch (Exception e) {
-            throw new RuntimeException("Error opening file.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error opening file.");
         }
     }
     private String encrypt(String toEncrypt) {
@@ -153,7 +155,7 @@ public class ActionsServiceImpl implements ActionsService{
             writer.write(master);
             writer.close();
         } catch(Exception e) {
-            throw new RuntimeException("Failed to open file.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error opening file.");
         }
     }
 }
