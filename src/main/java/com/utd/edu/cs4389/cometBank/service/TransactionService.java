@@ -1,58 +1,78 @@
 package com.utd.edu.cs4389.cometBank.service;
 
+import com.opencsv.*;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.utd.edu.cs4389.cometBank.model.Transaction;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
+@Slf4j
 public class TransactionService {
-    private List<Transaction> transactions = new ArrayList<>();
-    private static final String TRANSACTION_FILE = "transactions.txt";
-
+    private static final String TRANSACTION_FILE = "transaction.csv";
+    private final CSVParser parser = new CSVParserBuilder().withSeparator(',').build();
     public TransactionService() {
-        loadTransactionsFromFile();
+
     }
 
-    public List<Transaction> getAllTransactions() {
-        return transactions;
+    public List<Transaction> getAllTransactions(String accountNumber) {
+        return loadTransactionsFromFile().stream().filter(transaction -> accountNumber.equals(transaction.getAccountNumber())).toList();
     }
 
-    public void addTransaction(Transaction transaction) {
-        transactions.add(transaction);
-        saveTransactionsToFile();
+    private synchronized List<Transaction> loadTransactionsFromFile() {
+
+        try (FileReader filereader = new FileReader(TRANSACTION_FILE);
+                CSVReader csvReader = new CSVReaderBuilder(filereader)
+                        .withCSVParser(parser)
+                        .build()) {
+
+            CsvToBean<Transaction> csvToBean = new CsvToBeanBuilder<Transaction>(csvReader)
+                    .withType(Transaction.class)
+                    .build();
+
+            return csvToBean.parse();
+        } catch (Exception e) {
+            log.error("Error Reading From File {}", e.getMessage());
+        }
+        return Collections.emptyList();
     }
 
-    private void loadTransactionsFromFile() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 3) {
-                    String description = parts[0];
-                    double amount = Double.parseDouble(parts[1]);
-                    LocalDateTime timestamp = LocalDateTime.parse(parts[2]);
-                    //transactions.add(new Transaction(description, amount, timestamp));
-                }
+    public synchronized void addTransaction(Transaction transaction) {
+        String[] header = {"transactionId", "accountNumber", "amount","description","timeStamp"};
+        if(!Files.exists(Paths.get("",TRANSACTION_FILE))) {
+            try(CSVWriter writer = new CSVWriter(new FileWriter(TRANSACTION_FILE))) {
+                writer.writeNext(header);
+            }catch(Exception e){
+                log.error("Error Writing Header To File {}", e.getMessage());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        }
+        try (CSVWriter writer = new CSVWriter(new FileWriter(TRANSACTION_FILE,true))) {
+            String[] dataToAppend = {
+                    UUID.randomUUID().toString(),
+                    transaction.getAccountNumber(),
+                    String.valueOf(transaction.getAmount()),
+                    transaction.getDescription(),
+                    Instant.now().toString()
+            };
+            writer.writeNext(dataToAppend);
+
+        } catch (Exception e) {
+            log.error("Error Writing To File {}", e.getMessage());
         }
     }
 
-    private void saveTransactionsToFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(TRANSACTION_FILE))) {
-            for (Transaction transaction : transactions) {
-                String line = String.format("%s,%.2f,%s", transaction.getDescription(), transaction.getAmount(),
-                        transaction.getTimestamp());
-                writer.write(line);
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 }

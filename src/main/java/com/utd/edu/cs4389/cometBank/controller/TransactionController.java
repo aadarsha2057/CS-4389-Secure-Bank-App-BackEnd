@@ -3,9 +3,7 @@ package com.utd.edu.cs4389.cometBank.controller;
 import com.utd.edu.cs4389.cometBank.model.Transaction;
 import com.utd.edu.cs4389.cometBank.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,8 +17,13 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @GetMapping
-    public List<Transaction> getAllTransactions() {
-        return transactionService.getAllTransactions();
+    @GetMapping("getAllTransactions")
+    public List<Transaction> getAllTransactions(@RequestParam String accountNumber) {
+        return transactionService.getAllTransactions(accountNumber);
+    }
+
+    @PostMapping("addTransaction")
+    public void getAllTransactions(@RequestBody Transaction transaction) {
+         transactionService.addTransaction(transaction);
     }
 }
