@@ -13,6 +13,6 @@ public class AccountInfo {
     private String accountNumber;
     private String accountType;
     private String routingNumber;
-    private String balance;
+    private Double balance;
     private List<Transaction> transactions;
 }

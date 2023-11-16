@@ -1,10 +1,13 @@
 package com.utd.edu.cs4389.cometBank.controller;
 
+import com.utd.edu.cs4389.cometBank.model.AccountInfo;
 import com.utd.edu.cs4389.cometBank.service.AccountInformationService;
 import com.utd.edu.cs4389.cometBank.service.AccountService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class AccountController {
@@ -17,8 +20,8 @@ public class AccountController {
     }
 
     @GetMapping("accountInfo")
-    public void getAccountInformation(@RequestParam String email){
-        accountInformationService.getAccountInformation(email);
+    public List<AccountInfo> getAccountInformation(@RequestParam String email){
+        return accountInformationService.getAccountInformation(email);
 
     }
 }

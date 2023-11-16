@@ -22,13 +22,15 @@ import java.nio.file.StandardOpenOption;
 public class LoginServiceImpl implements LoginService {
 
     private Long temp = 1L;
+    private final AccountService accountService;
 
     // Default constructor
-    public LoginServiceImpl() {
+    public LoginServiceImpl(AccountService accountService) {
+        this.accountService = accountService;
     }
 
     @Override
-    public boolean checkUserCredentials(LoginDTO loginDTO, HttpSession session) {
+    public synchronized boolean checkUserCredentials(LoginDTO loginDTO, HttpSession session) {
         validateInput(loginDTO.getEmail(), loginDTO.getPassword(), null);
         try {
             // Open the credentials file for reading
@@ -60,7 +62,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void createUser(SignupDTO signupDTO) {
+    public synchronized void createUser(SignupDTO signupDTO) {
         try {
             LoginDTO loginDTO = new LoginDTO(signupDTO.getEmail(), signupDTO.getPassword());
             BufferedReader br = new BufferedReader(new FileReader("creds.txt"));
@@ -93,6 +95,7 @@ public class LoginServiceImpl implements LoginService {
         try {
             // Append the new user information to the credentials file
             Files.write(path, textToAppend.getBytes(), StandardOpenOption.APPEND);
+            accountService.addAccount(signupDTO.getEmail(),"Checking");
         } catch (Exception e) {
             // Log the exception
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Error saving credentials.");

@@ -21,9 +21,9 @@ public class AccountInformationService {
             AccountInfo accountInfo = new AccountInfo();
             accountInfo.setAccountNumber(obj.getAccountNumber());
             accountInfo.setRoutingNumber(obj.getAccountNumber());
-            accountInfo.setBalance(obj.getAccountType());
-            accountInfo.setTransactions(transactionService.getAllTransactions(obj.getAccountNumber()););
-
+            accountInfo.setBalance(obj.getBalance());
+            accountInfo.setAccountType(obj.getAccountType());
+            accountInfo.setTransactions(transactionService.getAllTransactions(obj.getAccountNumber()));
             return accountInfo;
         }).toList();
     }
