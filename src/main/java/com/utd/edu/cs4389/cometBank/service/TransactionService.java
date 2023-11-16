@@ -3,8 +3,6 @@ package com.utd.edu.cs4389.cometBank.service;
 import com.opencsv.*;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.utd.edu.cs4389.cometBank.model.Transaction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,14 +19,24 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class TransactionService {
+    private static final String DEBIT = "DEBIT";
+    private static final String CREDIT = "CREDIT";
+
     private static final String TRANSACTION_FILE = "transaction.csv";
     private final CSVParser parser = new CSVParserBuilder().withSeparator(',').build();
-    public TransactionService() {
 
+    private final AccountService accountService;
+
+    public TransactionService(AccountService accountService) {
+        this.accountService = accountService;
     }
 
+
     public List<Transaction> getAllTransactions(String accountNumber) {
-        return loadTransactionsFromFile().stream().filter(transaction -> accountNumber.equals(transaction.getAccountNumber())).toList();
+        return loadTransactionsFromFile()
+                .stream()
+                .filter(transaction -> accountNumber.equals(transaction.getAccountNumber()))
+                .toList();
     }
 
     private synchronized List<Transaction> loadTransactionsFromFile() {
@@ -50,28 +58,36 @@ public class TransactionService {
     }
 
     public synchronized void addTransaction(Transaction transaction) {
-        String[] header = {"transactionId", "accountNumber", "amount","description","timeStamp"};
-        if(!Files.exists(Paths.get("",TRANSACTION_FILE))) {
-            try(CSVWriter writer = new CSVWriter(new FileWriter(TRANSACTION_FILE))) {
-                writer.writeNext(header);
-            }catch(Exception e){
-                log.error("Error Writing Header To File {}", e.getMessage());
+        if(isValidTransaction(transaction)) {
+            String[] header = {"transactionId", "accountNumber", "transactionType","amount", "description", "timeStamp"};
+            if (!Files.exists(Paths.get("", TRANSACTION_FILE))) {
+                try (CSVWriter writer = new CSVWriter(new FileWriter(TRANSACTION_FILE))) {
+                    writer.writeNext(header);
+                } catch (Exception e) {
+                    log.error("Error Writing Header To File {}", e.getMessage());
+                }
+
             }
+            accountService.updateAccountBalance(transaction);
+            try (CSVWriter writer = new CSVWriter(new FileWriter(TRANSACTION_FILE, true))) {
+                String[] dataToAppend = {
+                        UUID.randomUUID().toString(),
+                        transaction.getAccountNumber(),
+                        transaction.getTransactionType(),
+                        String.valueOf(transaction.getAmount()),
+                        transaction.getDescription(),
+                        Instant.now().toString()
+                };
+                writer.writeNext(dataToAppend);
 
+            } catch (Exception e) {
+                log.error("Error Writing To File {}", e.getMessage());
+            }
         }
-        try (CSVWriter writer = new CSVWriter(new FileWriter(TRANSACTION_FILE,true))) {
-            String[] dataToAppend = {
-                    UUID.randomUUID().toString(),
-                    transaction.getAccountNumber(),
-                    String.valueOf(transaction.getAmount()),
-                    transaction.getDescription(),
-                    Instant.now().toString()
-            };
-            writer.writeNext(dataToAppend);
-
-        } catch (Exception e) {
-            log.error("Error Writing To File {}", e.getMessage());
-        }
+    }
+    private static boolean isValidTransaction(Transaction transaction){
+        return
+                DEBIT.equals(transaction.getTransactionType()) || CREDIT.equals(transaction.getTransactionType());
     }
 
 

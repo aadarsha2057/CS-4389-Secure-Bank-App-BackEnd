@@ -21,6 +21,9 @@ public class Transaction {
     private String timeStamp;
 
     @CsvBindByName
+    private String transactionType;
+
+    @CsvBindByName
     private String description;
 
     // Constructors, getters, and setters
